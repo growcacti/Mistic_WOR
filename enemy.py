@@ -71,7 +71,13 @@ class Enemy(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.hit_rect.center = self.rect.center 
         self.get_move()  # Call the get_move method to update the direction
-
+        
+        spell_hits = pg.sprite.spritecollide(self, self.game.spells, True)
+        for spell in spell_hits:
+            # Increase the player's score
+            self.game.player.score += 1
+            # Remove the enemy sprite from groups and kill it
+            self.kill()
     def get_move(self):
         if abs(self.direction.x) > abs(self.direction.y):
             if self.direction.x > 0:
