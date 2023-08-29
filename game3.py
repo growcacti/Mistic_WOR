@@ -1,12 +1,11 @@
 import pygame as pg
-import sys
 from os import path
-
+import sys
 from config import *
 from player import *
 from enemy import *
 from enemy2 import *
-from tilemap import *
+from tiledmap2 import *
 from other_sprites import *
 
 
@@ -18,26 +17,89 @@ class Game:
 
         self.player = Player(self, 600, 600)
         self.spells = pg.sprite.Group()
-
+    
         self.clock = pg.time.Clock()
         self.load_data()
         self.score_font = pg.font.Font(None, 28)  # Create a font object for the score
-
+ 
     def load_data(self):
         game_folder = path.dirname(__file__)
         img_folder = path.join(game_folder, "img")
-        map_folder = path.join(game_folder, "map")
-        self.map = TiledMap()
+        map_folder = path.join(game_folder, "maps")
+        map_filename = path.join(map_folder, "L88.tmx")  # Replace with your map file
+        self.map = TiledMap(map_filename)  # Create an instance of TiledMap with the map filename
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
         self.enemies = pg.sprite.Group()
-        self.health = pg.sprite.Group()  # Add the health group here
+  
+        self.health_objects = pg.sprite.Group()
+    def load_map(self, map_filename):
+        self.map = TiledMap(map_filename)
+        self.map_img = self.map.make_map()
+        self.map_rect = self.map_img.get_rect()
+        self.walls.empty()  # Clear the walls group
+        self.portals.empty()  # Clear the portals group
+        self.all_sprites.empty()  # Clear all sprites group
+        self.player = None  # Clear the player reference
 
+        for tile_object in self.map.tmxdata.objects:
+            if tile_object.name == "player":
+                self.player = Player(self, tile_object.x, tile_object.y)
+            elif tile_object.name == "nme":
+                self.nme = Enemy(self, tile_object.x, tile_object.y)
+                self.enemies.add(self.nme)
+            elif tile_object.name == "nme2":
+                self.nme2 = Nme2(self, tile_object.x, tile_object.y)
+                self.enemies.add(self.nme2)
+            elif tile_object.name == "health":
+                self.health_obj = Health(
+                    self,
+                    tile_object.x,
+                    tile_object.y,
+                    tile_object.width,
+                    tile_object.height,
+                )
+                self.health_objects.add(self.health_obj)
+            elif tile_object.name == "wall":
+                Obstacle(
+                    self,
+                    tile_object.x,
+                    tile_object.y,
+                    tile_object.width,
+                    tile_object.height,
+                )
+            elif tile_object.name == "portal":
+                game_folder = path.dirname(__file__)
+       
+                map_folder = path.join(game_folder, "maps")
+                map_filename = path.join(map_folder,"map88.tmx")
+                portal = Portal(
+                    self,
+                    tile_object.x,
+                    tile_object.y,
+                    tile_object.width,
+                    tile_object.height,
+                    map_filename
+                   
+                )
+                self.portals.add(portal)
+                self.all_sprites.add(portal)
+
+        self.camera = Camera(self.map.width, self.map.height)
+
+            
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        self.health.empty()
+        self.health_obj = pg.sprite.Group()
+        
+        self.portals = pg.sprite.Group()
+        self.enemies.empty()
+        self.spells.empty()
+        self.load_map("maps/L4.tmx")
+        self.draw_debug = False
+
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == "player":
                 self.player = Player(self, tile_object.x, tile_object.y)
@@ -49,14 +111,14 @@ class Game:
                 self.enemies.add(self.nme2)
 
             if tile_object.name == "health":
-                self.health = Health(
+                self.health_obj = Health(
                     self,
                     tile_object.x,
                     tile_object.y,
                     tile_object.width,
                     tile_object.height,
                 )
-                self.all_sprites.add(self.health)
+                self.wall_img = tile_object.name
 
             if tile_object.name == "wall":
                 Obstacle(
@@ -67,9 +129,56 @@ class Game:
                     tile_object.height,
                 )
                 self.wall_img = tile_object.name
-
+            if tile_object.name == "portal":
+                Obstacle(
+                    self,
+                    tile_object.x,
+                    tile_object.y,
+                    tile_object.width,
+                    tile_object.height,
+                )
+                self.wall_img = tile_object.name
         self.camera = Camera(self.map.width, self.map.height)
         self.draw_debug = False
+
+
+    def draw(self):
+        pg.display.set_caption(
+            "Player Position: ({0}, {1})".format(
+                int(self.player.pos[0]), int(self.player.pos[1])
+            )
+        )
+
+        self.screen.blit(self.map_img, self.camera.apply_rect(self.map_rect))
+
+        for sprite in self.all_sprites:
+
+            self.screen.blit(sprite.image, self.camera.apply(sprite))
+            if self.draw_debug:
+                pg.draw.rect(
+                    self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1
+                )
+        if self.draw_debug:
+            for wall in self.walls:
+                pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(wall.rect), 1)
+
+        if self.draw_debug:
+            for wall in self.walls:
+                pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(wall.rect), 1)
+
+        score_text = self.score_font.render(
+            "Score: {}".format((self.player.score)), True, CYAN
+        )
+        score_rect = score_text.get_rect()
+        score_rect.topright = SCORE_POSITION
+        self.screen.blit(score_text, score_rect)
+        self.player.health_bar.draw(self.screen)
+        pg.display.flip()
+
+
+
+
+
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -100,12 +209,10 @@ class Game:
 
         # Check for collisions between player and health objects
         player_health_collisions = pg.sprite.spritecollide(
-            self.player, self.health, True
+            self.player, self.health_objects, True
         )
         if player_health_collisions:
-            self.player.health += (
-                10  # Increase the player's health when colliding with a health object
-            )
+            self.player.health += 10  
 
         # Check for collisions between player and enemies
         spell_hits = pg.sprite.spritecollide(self.player, self.enemies, True)
@@ -143,13 +250,15 @@ class Game:
             self.player.health_bar.update()
 
         player_health_collisions = pg.sprite.spritecollide(
-            self.player, self.health, True
+            self.player, self.health_objects, True
         )
         if player_health_collisions:
             self.player.health += (
                 10  # Increase the player's health when colliding with a health object
             )
-
+        portal_collisions = pg.sprite.spritecollide(self.player, self.portals, False)
+        if portal_collisions:
+            portal_collisions[0].collide_with_player()        
     def draw(self):
         pg.display.set_caption(
             "Player Position: ({0}, {1})".format(
@@ -207,8 +316,7 @@ class Game:
                             self.player.angle,
                         )
                         self.player.fire_spell(self.player.angle)
-
-
+        
 # create the game object
 g = Game()
 

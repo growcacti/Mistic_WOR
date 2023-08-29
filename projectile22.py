@@ -10,11 +10,11 @@ class Bullet(pg.sprite.Sprite):
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.surf = pg.Surface((32, 36)).convert_alpha()
-        self.sheet = pg.image.load("img/force.png").convert_alpha()
-        self.size = (32, 36)
+        self.surf = pg.Surface((837, 96)).convert_alpha()
+        self.sheet = pg.image.load("img/forcew2.png").convert_alpha()
+        self.size = (837,96)
         self.start = (1, 1)
-        self.frames = self.strip(self.sheet, (0, 72), self.size, 3)
+        self.frames = self.strip(self.sheet, (120, 96), self.size, 9)
         self.frame_iter = cycle(self.frames)  # Create an iterator for cycling frames
         self.image = next(self.frame_iter)  # Get the first fram
         self.rect = pg.Rect(self.image.get_rect())
@@ -41,16 +41,16 @@ class Bullet(pg.sprite.Sprite):
 
             if self.angle == 90:
                 # Up
-                self.frames = self.strip(self.sheet, (0, 0), self.size, 3)
+                self.frames = self.strip(self.sheet, (120, 96), self.size, 9)
             elif self.angle == 270:
                 # Down
-                self.frames = self.strip(self.sheet, (0, 72), self.size, 3)
+                self.frames = self.strip(self.sheet, (240, 96), self.size, 9)
             elif self.angle == 180:
                 # Left
-                self.frames = self.strip(self.sheet, (0, 106), self.size, 3)
+                self.frames = self.strip(self.sheet, (360, 96), self.size, 9)
             elif self.angle == 0:
                 # Right
-                self.frames = self.strip(self.sheet, (0, 37), self.size, 3)
+                self.frames = self.strip(self.sheet, (480, 96), self.size, 9)
 
             self.frame_iter = cycle(self.frames)
             self.image = next(self.frame_iter)

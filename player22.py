@@ -252,12 +252,12 @@ class Spell(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.surf = pg.Surface((32, 36)).convert_alpha()
-        self.sheet = pg.image.load("img/force.png").convert_alpha()
+        self.sheet = pg.image.load("img/forcew2.png").convert_alpha()
         self.size = (32, 36)
-        self.frames_down = self.strip(self.sheet, (0, 72), self.size, 3)
-        self.frames_up = self.strip(self.sheet, (0, 0), self.size, 3)
-        self.frames_left = self.strip(self.sheet, (0, 106), self.size, 3)
-        self.frames_right = self.strip(self.sheet, (0, 37), self.size, 3)
+        self.frames_down = self.strip(self.sheet, (120, 96), self.size, 9)
+        self.frames_up = self.strip(self.sheet, (240, 96), self.size, 9)
+        self.frames_left = self.strip(self.sheet, (360, 96), self.size, 9)
+        self.frames_right = self.strip(self.sheet, (480, 96), self.size, 9)
         self.frame_iter = cycle(
             self.get_frames(angle)
         )  # Create an iterator for cycling frames

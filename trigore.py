@@ -7,11 +7,11 @@ from itertools import cycle, repeat
 vec = pg.math.Vector2
 
 
-class Enemy(pg.sprite.Sprite):
+class Nme2(pg.sprite.Sprite):
     def __init__(self, game, px, py):
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
-        self.sheet = pg.image.load("img/g.png").convert_alpha()
+        self.sheet = pg.image.load("img/llore.png").convert_alpha()
         self.size = (32, 36)
         self.frames = self.strip(self.sheet, (0, 72), self.size, 3)
         self.frame_index = 0

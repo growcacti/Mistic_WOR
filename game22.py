@@ -3,7 +3,7 @@ import sys
 from os import path
 
 from config import *
-from player import *
+from player22 import *
 from enemy import *
 from enemy2 import *
 from tilemap import *
@@ -146,9 +146,7 @@ class Game:
             self.player, self.health, True
         )
         if player_health_collisions:
-            self.player.health += (
-                10  # Increase the player's health when colliding with a health object
-            )
+            self.player.health += (10)
 
     def draw(self):
         pg.display.set_caption(
